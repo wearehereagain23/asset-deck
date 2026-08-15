@@ -1,5 +1,5 @@
 /**
- * Asset-Deck Registration Logic & API Integration
+ * Assets-Deck Registration Logic & API Integration
  */
 
 const API_BASE_URL = "https://broker-chi-five.vercel.app/api/register-user";

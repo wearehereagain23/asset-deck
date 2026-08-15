@@ -1,5 +1,5 @@
 /**
- * Asset-Deck Dashboard Logic Controller
+ * Assets-Deck Dashboard Logic Controller
  */
 
 const DATA_API_URL = "https://broker-chi-five.vercel.app/api/data";
