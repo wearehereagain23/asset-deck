@@ -1,43 +1,13 @@
 let activeChatSessionUserUuid = null;
+let activeChatSessionUserEmail = null;
 let currentChatPaginationPage = 1;
 const chatMaxLimitPerPage = 20;
 let isChatInfiniteScrollLoading = false;
 let absoluteHasOlderDatabaseMessages = true;
 
-// Retrieve user JWT token from localStorage keys saved by login.js
-function getUserToken() {
-    let token = localStorage.getItem("user_token");
-
-    if (!token) {
-        try {
-            const session = JSON.parse(localStorage.getItem("user_session") || "{}");
-            token = session.token || null;
-        } catch (e) { }
-    }
-
-    if (!token || token === "null" || token === "undefined") {
-        console.warn("⚠️ No valid user authentication token found in localStorage.");
-        return null;
-    }
-
-    return token;
-}
-
-// Retrieve user UUID from localStorage saved by login.js
-function getUserUuidFromStorage() {
-    try {
-        const session = JSON.parse(localStorage.getItem("user_session") || "{}");
-        if (session.uuid) return session.uuid;
-
-        const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
-        if (userData.uuid) return userData.uuid;
-    } catch (e) { }
-    return null;
-}
-
-export function setupSecureChatChannel(userUuid) {
-    // Use passed UUID or fallback to user_session / user_data in localStorage
-    activeChatSessionUserUuid = userUuid || getUserUuidFromStorage();
+export function setupSecureChatChannel(userUuid, userEmail = null) {
+    activeChatSessionUserUuid = userUuid;
+    activeChatSessionUserEmail = userEmail;
     currentChatPaginationPage = 1;
     absoluteHasOlderDatabaseMessages = true;
     isChatInfiniteScrollLoading = false;
@@ -48,40 +18,51 @@ export function setupSecureChatChannel(userUuid) {
     const hiddenFile = document.getElementById("chat-image-attachment-input");
     const feedElementContainer = document.getElementById("chat-message-feed");
 
+    const deleteAllBtn = document.getElementById("chat-header-delete-all-btn");
 
-    // Auto-resize functionality while typing
-    textInput.addEventListener("input", () => {
-        textInput.style.height = "auto";
-        textInput.style.height = `${Math.min(textInput.scrollHeight, 120)}px`;
-    });
+    if (deleteAllBtn) deleteAllBtn.onclick = null;
 
-    // Handle pressing Enter to send (Shift + Enter creates a new line)
-    textInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendBtn.click();
-        }
-    });
+    // Header Trigger: Delete All Chat Thread
+    if (deleteAllBtn) {
+        deleteAllBtn.onclick = async () => {
+            if (!activeChatSessionUserUuid) return;
 
-    sendBtn.onclick = async () => {
-        const text = textInput.value.trim();
-        if (!text) return;
+            const confirmPurge = await Swal.fire({
+                title: "Purge Entire Chat Log?",
+                text: "This action will permanently delete all chat messages for this user.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                cancelButtonColor: "#64748b",
+                confirmButtonText: "Yes, Delete All"
+            });
 
-        textInput.value = "";
-        textInput.style.height = "auto"; // 🚀 Resets textarea height back to default after sending
+            if (confirmPurge.isConfirmed) {
+                const adminToken = localStorage.getItem("admin_session_token");
+                try {
+                    const r = await fetch(`https://broker-chi-five.vercel.app/api/admin-chat?purge_all=true&user_uuid=${activeChatSessionUserUuid}`, {
+                        method: "DELETE",
+                        headers: { "Authorization": `Bearer ${adminToken}` }
+                    });
+                    const resData = await r.json();
 
-        const temporaryMessageId = `temp_msg_${Date.now()}`;
-        injectOptimisticChatBubbleNode(text, null, temporaryMessageId);
-        await dispatchMessagePayload(text, null, temporaryMessageId);
-    };
-
-    if (!activeChatSessionUserUuid) {
-        console.error("🔒 Cannot initialize chat: User UUID is missing from session.");
-        return;
+                    if (resData.success) {
+                        const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
+                        localStorage.removeItem(localizedCacheKey);
+                        renderChatMessageFeedFromCacheArray([], false);
+                        Swal.fire("Purged!", "All messages cleared.", "success");
+                    } else {
+                        Swal.fire("Error", resData.error || "Failed to purge messages.", "error");
+                    }
+                } catch (err) {
+                    Swal.fire("Error", "Server connection failure.", "error");
+                }
+            }
+        };
     }
 
     // Baseline Cache Hydration
-    const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+    const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
     const historicalLocalMessages = localStorage.getItem(localizedCacheKey);
 
     if (historicalLocalMessages) {
@@ -96,7 +77,7 @@ export function setupSecureChatChannel(userUuid) {
             feedElementContainer.innerHTML = `
                 <div class="system-security-notice-bubble">
                     <i data-lucide="lock" class="inline-status-icon"></i>
-                    <span>Initializing secure support channel...</span>
+                    <span>Initializing transaction secure conversation channel matrices...</span>
                 </div>`;
             if (window.lucide) lucide.createIcons();
         }
@@ -105,10 +86,7 @@ export function setupSecureChatChannel(userUuid) {
     fetchSecureConversationStreams(true);
 
     if (feedElementContainer) {
-        feedElementContainer.onscroll = async (e) => {
-            // Isolate scroll events to prevent document body scrolling
-            if (e) e.stopPropagation();
-
+        feedElementContainer.onscroll = async () => {
             if (feedElementContainer.scrollTop === 0 && !isChatInfiniteScrollLoading && absoluteHasOlderDatabaseMessages) {
                 await fetchOlderHistoricalChatLogs();
             }
@@ -136,7 +114,7 @@ export function setupSecureChatChannel(userUuid) {
             const localOptimisticObjectURL = URL.createObjectURL(targetFile);
             const temporaryMessageId = `temp_msg_${Date.now()}`;
 
-            const attachmentPlaceholderText = "Shared a file document update.";
+            const attachmentPlaceholderText = "Shared a secure file document update.";
             injectOptimisticChatBubbleNode(attachmentPlaceholderText, localOptimisticObjectURL, temporaryMessageId);
             const uploadedUrl = await clearFileAssetStorageUpload(targetFile);
 
@@ -159,17 +137,13 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
     feed.innerHTML = `
         <div class="system-security-notice-bubble">
             <i data-lucide="lock" class="inline-status-icon"></i>
-            <span>Messages are end-to-end encrypted with support staff.</span>
+            <span>Messages are synced over administrative ledger configurations.</span>
         </div>`;
 
     messagesArray.forEach(msg => {
         const container = document.createElement("div");
-
-        // User Side View Perspective:
-        // Messages sent by user ('user') -> outgoing (Right side)
-        // Messages sent by support ('admin_2') -> incoming (Left side)
-        const isUserMsg = msg.sender_role === "user";
-        const alignmentClass = isUserMsg ? "outgoing" : "incoming";
+        const isAdmin = msg.sender_role === "admin_2";
+        const alignmentClass = isAdmin ? "outgoing" : "incoming";
 
         container.className = `msg-bubble ${alignmentClass}`;
         if (msg.isSending) container.classList.add("msg-bubble-is-sending");
@@ -178,25 +152,78 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
 
         let attachmentContentHTML = "";
         if (msg.attachment_url) {
-            attachmentContentHTML = `<img src="${msg.attachment_url}" style="max-width:100%; border-radius:6px; margin-bottom:4px; display:block;" alt="Attachment">`;
+            attachmentContentHTML = `<img src="${msg.attachment_url}" style="max-width:100%; border-radius:6px; margin-bottom:4px; display:block;" alt="Media Asset">`;
         }
 
         let statusIndicatorMessage = "";
         if (msg.isSending) statusIndicatorMessage = ` <small class="text-sending-indicator">⏱️ Sending...</small>`;
-        if (msg.isFailed) statusIndicatorMessage = ` <small class="text-failed-indicator">🔴 Failed to Send</small>`;
+        if (msg.isFailed) statusIndicatorMessage = ` <small class="text-failed-indicator">🔴 Failed to Sync</small>`;
 
         const timeString = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : "--:--";
 
-        // Render message content without admin edit/delete controls
+        let adminActionToolbarHTML = "";
+        if (isAdmin && msg.id && !msg.isSending) {
+            adminActionToolbarHTML = `
+                <div class="msg-action-bar" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
+                    <button type="button" class="btn-edit-msg" data-id="${msg.id}" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 2px;" title="Edit Message">
+                        <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button type="button" class="btn-delete-msg" data-id="${msg.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;" title="Delete Message">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+            `;
+        }
+
         container.innerHTML = `
             ${attachmentContentHTML}
             <p id="msg-body-text-${msg.id}">${escapeHTML(msg.message_body || '')}</p>
             <span class="msg-timestamp">${timeString}${statusIndicatorMessage}</span>
+            ${adminActionToolbarHTML}
         `;
         feed.appendChild(container);
     });
 
     if (window.lucide) lucide.createIcons();
+
+    feed.querySelectorAll(".btn-edit-msg").forEach(btn => {
+        btn.onclick = async () => {
+            const msgId = btn.getAttribute("data-id");
+            const textElement = document.getElementById(`msg-body-text-${msgId}`);
+            const currentText = textElement ? textElement.innerText : "";
+
+            const { value: updatedText } = await Swal.fire({
+                title: "Edit Message",
+                input: "textarea",
+                inputValue: currentText,
+                showCancelButton: true,
+                confirmButtonText: "Update",
+                confirmButtonColor: "#3b82f6"
+            });
+
+            if (updatedText && updatedText.trim() !== currentText) {
+                await executeUpdateSingleChatMessage(msgId, updatedText.trim());
+            }
+        };
+    });
+
+    feed.querySelectorAll(".btn-delete-msg").forEach(btn => {
+        btn.onclick = async () => {
+            const msgId = btn.getAttribute("data-id");
+            const confirmDelete = await Swal.fire({
+                title: "Delete message?",
+                text: "This single message entry will be removed.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                confirmButtonText: "Delete"
+            });
+
+            if (confirmDelete.isConfirmed) {
+                await executeDeleteSingleChatMessage(msgId);
+            }
+        };
+    });
 
     if (preserveScrollPosition) {
         feed.scrollTop = feed.scrollHeight - previousScrollHeight;
@@ -205,37 +232,80 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
     }
 }
 
-async function fetchSecureConversationStreams(isInitialLoad = false) {
-    const userToken = getUserToken();
-    if (!activeChatSessionUserUuid) return;
-    if (!userToken) {
-        console.error("🔒 Cannot fetch chat stream: Missing User Bearer Token.");
-        return;
+async function executeUpdateSingleChatMessage(msgId, newText) {
+    const adminToken = localStorage.getItem("admin_session_token");
+    try {
+        const response = await fetch("https://broker-chi-five.vercel.app/api/admin-chat", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({ message_id: msgId, message_body: newText })
+        });
+
+        const resData = await response.json();
+        if (resData.success) {
+            const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
+            let messages = JSON.parse(localStorage.getItem(localizedCacheKey) || "[]");
+            const idx = messages.findIndex(m => m.id == msgId);
+            if (idx !== -1) {
+                messages[idx].message_body = newText;
+                localStorage.setItem(localizedCacheKey, JSON.stringify(messages));
+                renderChatMessageFeedFromCacheArray(messages, true);
+            }
+        } else {
+            Swal.fire("Error", resData.error || "Update failed.", "error");
+        }
+    } catch (err) {
+        Swal.fire("Error", "Failed to update chat message.", "error");
     }
+}
+
+async function executeDeleteSingleChatMessage(msgId) {
+    const adminToken = localStorage.getItem("admin_session_token");
+    try {
+        const response = await fetch(`https://broker-chi-five.vercel.app/api/admin-chat?message_id=${msgId}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${adminToken}` }
+        });
+
+        const resData = await response.json();
+        if (resData.success) {
+            const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
+            let messages = JSON.parse(localStorage.getItem(localizedCacheKey) || "[]");
+            messages = messages.filter(m => m.id != msgId);
+            localStorage.setItem(localizedCacheKey, JSON.stringify(messages));
+            renderChatMessageFeedFromCacheArray(messages, true);
+        } else {
+            Swal.fire("Error", resData.error || "Deletion failed.", "error");
+        }
+    } catch (err) {
+        Swal.fire("Error", "Failed to delete chat message.", "error");
+    }
+}
+
+async function fetchSecureConversationStreams(isInitialLoad = false) {
+    const adminToken = localStorage.getItem("admin_session_token");
+    if (!activeChatSessionUserUuid) return;
 
     try {
         const r = await fetch(`https://broker-chi-five.vercel.app/api/admin-chat?uuid=${activeChatSessionUserUuid}&page=1&limit=${chatMaxLimitPerPage}`, {
             method: "GET",
-            headers: { "Authorization": `Bearer ${userToken}` }
+            headers: { "Authorization": `Bearer ${adminToken}` }
         });
-
-        if (r.status === 401) {
-            console.error("🔴 Server responded with 401 Unauthorized. Session expired or invalid token.");
-            return;
-        }
-
         const payload = await r.json();
         const incomingServerChats = payload.chats || [];
 
         absoluteHasOlderDatabaseMessages = payload.hasMore;
 
-        const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+        const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
         localStorage.setItem(localizedCacheKey, JSON.stringify(incomingServerChats));
 
         renderChatMessageFeedFromCacheArray(incomingServerChats, !isInitialLoad);
 
     } catch (err) {
-        console.error("Chat feed sync error:", err);
+        console.error("Chat baseline feed sync drop error:", err);
     }
 }
 
@@ -243,21 +313,14 @@ async function fetchOlderHistoricalChatLogs() {
     if (isChatInfiniteScrollLoading || !absoluteHasOlderDatabaseMessages) return;
 
     isChatInfiniteScrollLoading = true;
-    const userToken = getUserToken();
-    if (!userToken) {
-        isChatInfiniteScrollLoading = false;
-        return;
-    }
-
+    const adminToken = localStorage.getItem("admin_session_token");
     const nextPage = currentChatPaginationPage + 1;
 
     try {
         const response = await fetch(`https://broker-chi-five.vercel.app/api/admin-chat?uuid=${activeChatSessionUserUuid}&page=${nextPage}&limit=${chatMaxLimitPerPage}`, {
             method: "GET",
-            headers: { "Authorization": `Bearer ${userToken}` }
+            headers: { "Authorization": `Bearer ${adminToken}` }
         });
-
-        if (response.status === 401) return;
 
         const payload = await response.json();
         const olderHistoricalChats = payload.chats || [];
@@ -266,7 +329,7 @@ async function fetchOlderHistoricalChatLogs() {
             currentChatPaginationPage = nextPage;
             absoluteHasOlderDatabaseMessages = payload.hasMore;
 
-            const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+            const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
             let activeUIArrayInstance = [];
             const localCacheString = localStorage.getItem(localizedCacheKey);
             if (localCacheString) {
@@ -280,14 +343,14 @@ async function fetchOlderHistoricalChatLogs() {
         }
 
     } catch (err) {
-        console.error("Error running historical chat log fetch:", err);
+        console.error("Error running backward history paginator sync routines:", err);
     } finally {
         isChatInfiniteScrollLoading = false;
     }
 }
 
 function injectOptimisticChatBubbleNode(textString, objectAssetUrl, targetTempId) {
-    const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+    const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
     let historicalCachedArray = [];
 
     const localCacheString = localStorage.getItem(localizedCacheKey);
@@ -297,7 +360,7 @@ function injectOptimisticChatBubbleNode(textString, objectAssetUrl, targetTempId
 
     const optimisticFakeRow = {
         id: targetTempId,
-        sender_role: "user",
+        sender_role: "admin_2",
         message_body: textString,
         attachment_url: objectAssetUrl,
         created_at: new Date().toISOString(),
@@ -315,7 +378,7 @@ function injectOptimisticChatBubbleNode(textString, objectAssetUrl, targetTempId
 }
 
 function markOptimisticBubbleExecutionStateAsDropped(targetTempId) {
-    const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+    const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
     const localCacheString = localStorage.getItem(localizedCacheKey);
     if (!localCacheString) return;
 
@@ -332,13 +395,8 @@ function markOptimisticBubbleExecutionStateAsDropped(targetTempId) {
 }
 
 async function dispatchMessagePayload(text, fileUrl, replacementTargetTempId = null) {
-    const userToken = getUserToken();
+    const adminToken = localStorage.getItem("admin_session_token");
     const temporaryMessageId = replacementTargetTempId || `temp_msg_${Date.now()}`;
-
-    if (!userToken) {
-        markOptimisticBubbleExecutionStateAsDropped(temporaryMessageId);
-        return;
-    }
 
     if (!replacementTargetTempId) {
         injectOptimisticChatBubbleNode(text, fileUrl, temporaryMessageId);
@@ -349,13 +407,15 @@ async function dispatchMessagePayload(text, fileUrl, replacementTargetTempId = n
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${userToken}`
+                "Authorization": `Bearer ${adminToken}`
             },
             body: JSON.stringify({
                 user_uuid: activeChatSessionUserUuid,
+                user_email: activeChatSessionUserEmail,
+                recipient_email: activeChatSessionUserEmail,
+                email: activeChatSessionUserEmail,
                 message_body: text,
-                attachment_url: fileUrl,
-                sender_role: "user"
+                attachment_url: fileUrl
             })
         });
 
@@ -364,7 +424,7 @@ async function dispatchMessagePayload(text, fileUrl, replacementTargetTempId = n
         const resultData = await response.json();
 
         if (resultData.success && resultData.message) {
-            const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
+            const localizedCacheKey = `admin_chat_history_${activeChatSessionUserUuid}`;
             const localCacheString = localStorage.getItem(localizedCacheKey);
 
             if (localCacheString) {
@@ -382,7 +442,7 @@ async function dispatchMessagePayload(text, fileUrl, replacementTargetTempId = n
                         return;
                     }
                 } catch (e) {
-                    console.error("Cache processing failure:", e);
+                    console.error("Cache processing stabilization failure:", e);
                 }
             }
         }
@@ -391,15 +451,13 @@ async function dispatchMessagePayload(text, fileUrl, replacementTargetTempId = n
         await fetchSecureConversationStreams(true);
 
     } catch (err) {
-        console.error("Transmission fault recorded:", err);
+        console.error("Transmission fault instance recorded:", err);
         markOptimisticBubbleExecutionStateAsDropped(temporaryMessageId);
     }
 }
 
 async function clearFileAssetStorageUpload(file) {
-    const userToken = getUserToken();
-    if (!userToken) return null;
-
+    const adminToken = localStorage.getItem("admin_session_token");
     const formData = new FormData();
     formData.append("avatar", file);
 
@@ -407,7 +465,7 @@ async function clearFileAssetStorageUpload(file) {
         const response = await fetch("https://broker-chi-five.vercel.app/api/avatar", {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${userToken}`,
+                "Authorization": `Bearer ${adminToken}`,
                 "X-Action": "chat",
                 "X-User-UUID": activeChatSessionUserUuid
             },
@@ -416,7 +474,7 @@ async function clearFileAssetStorageUpload(file) {
         const data = await response.json();
         return data.success ? data.imageUrl : null;
     } catch (err) {
-        console.error("File asset transport error:", err);
+        console.error("File Asset critical transport drop:", err);
         return null;
     }
 }
