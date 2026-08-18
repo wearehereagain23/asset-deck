@@ -142,7 +142,7 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
 
     messagesArray.forEach(msg => {
         const container = document.createElement("div");
-        const isAdmin = msg.sender_role === "admin";
+        const isAdmin = msg.sender_role === "admin_2";
         const alignmentClass = isAdmin ? "outgoing" : "incoming";
 
         container.className = `msg-bubble ${alignmentClass}`;
@@ -360,7 +360,7 @@ function injectOptimisticChatBubbleNode(textString, objectAssetUrl, targetTempId
 
     const optimisticFakeRow = {
         id: targetTempId,
-        sender_role: "admin",
+        sender_role: "admin_2",
         message_body: textString,
         attachment_url: objectAssetUrl,
         created_at: new Date().toISOString(),

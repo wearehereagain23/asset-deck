@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://broker-chi-five.vercel.app/api';
 const WS_URL = 'ws://localhost:5000';
-const HARDCODED_WORKSPACE_SIGNATURE = "asset-deck";
+const HARDCODED_WORKSPACE_SIGNATURE = 'asset-deck';
 
 let wsClient = null;
 

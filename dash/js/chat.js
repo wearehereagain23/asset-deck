@@ -140,7 +140,7 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
 
         // User Side View Perspective:
         // Messages sent by user ('user') -> outgoing (Right side)
-        // Messages sent by support ('admin') -> incoming (Left side)
+        // Messages sent by support ('admin_2') -> incoming (Left side)
         const isUserMsg = msg.sender_role === "user";
         const alignmentClass = isUserMsg ? "outgoing" : "incoming";
 

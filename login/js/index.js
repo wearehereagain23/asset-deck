@@ -55,6 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem("user_token", result.token);
                 localStorage.setItem("user_data", JSON.stringify(result.user));
 
+                // Explicitly state full login from the official login page
+                localStorage.setItem("login_type", "from_login_page");
+
                 Swal.fire({
                     icon: "success",
                     title: "Welcome Back!",
