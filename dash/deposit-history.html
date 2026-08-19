@@ -6,7 +6,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Deposit History | Assets-Deck</title>
-
+    <link rel="icon" type="image/png" sizes="16x16" href="./asset/favicon.png">
     <!-- Material Icons & Google Fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -161,12 +161,12 @@
                             </tr>
                         </thead>
                         <tbody id="depositTableBody">
-                            <!-- Populated dynamically via deposit-history.js -->
+
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination Navigation Controls -->
+
                 <div class="pagination-container" id="paginationControls">
                     <button id="prevBtn" class="btn-primary pagination-btn" style="display: none;">
                         <i class="material-icons">chevron_left</i> Previous
@@ -178,7 +178,6 @@
                 </div>
             </section>
 
-            <!-- Footer -->
             <footer class="app-footer">
                 <p>&copy; 2026 Assets-Deck. All rights reserved.</p>
             </footer>
@@ -186,22 +185,22 @@
     </div>
 
 
-    <!-- Transaction Details Modal -->
+
     <div class="modal-overlay" id="txModalOverlay">
         <div class="modal-card receipt-modal-wrapper">
             <button class="modal-close-btn" id="closeModalBtn" title="Close">
                 <i class="material-icons">close</i>
             </button>
 
-            <!-- Designed Receipt Preview Box -->
+
             <div id="receiptPreviewBox" class="receipt-card-container">
 
-                <!-- Brand Header -->
+
                 <div class="receipt-brand-header">
                     <img src="./asset/logo.png" alt="Logo" class="receipt-brand-logo">
                 </div>
 
-                <!-- Success Badge & Heading -->
+
                 <div class="receipt-status-header">
                     <div class="receipt-success-icon" id="modalStatusBadgeIcon">
                         <i class="material-icons">check</i>
@@ -211,7 +210,7 @@
                     </p>
                 </div>
 
-                <!-- Main Details Box 1: Transaction Summary -->
+
                 <div class="receipt-section-box">
                     <div class="receipt-section-header">
                         <i class="material-icons">assignment</i>
@@ -242,7 +241,7 @@
                     </div>
                 </div>
 
-                <!-- Main Details Box 2: Account Details -->
+
                 <div class="receipt-section-box">
                     <div class="receipt-section-header">
                         <i class="material-icons">account_circle</i>
@@ -260,7 +259,7 @@
                     </div>
                 </div>
 
-                <!-- Status & Reference Footer Box -->
+
                 <div class="receipt-section-box receipt-footer-box">
                     <div class="receipt-grid-2col align-center">
                         <div class="receipt-grid-item">
@@ -274,7 +273,7 @@
                     </div>
                 </div>
 
-                <!-- Footer Branding & QR Code -->
+
                 <div class="receipt-bottom-branding">
                     <div class="receipt-branding-text">
                         <div class="receipt-shield-icon">
@@ -302,7 +301,7 @@
         </div>
     </div>
 
-    <!-- Slide-in Chat UI Panel -->
+
     <div class="chat-drawer-overlay" id="chatDrawerOverlay"></div>
     <div class="chat-drawer" id="chatDrawer">
         <div class="chat-drawer-header">
@@ -318,7 +317,7 @@
         </div>
 
         <div class="chat-feed-container" id="chat-message-feed">
-            <!-- Hydrated by chat.js -->
+
         </div>
 
         <div class="chat-drawer-footer">
@@ -333,7 +332,7 @@
         </div>
     </div>
 
-    <!-- Mobile Bottom App Bar -->
+
     <nav class="bottom-app-bar">
         <a href="index.html" class="nav-item">
             <i class="material-icons">home</i>
@@ -359,12 +358,12 @@
 
 
 
-    <!-- Custom JS Scripts -->
+
     <script src="./js/theme.js"></script>
     <script src="./js/index.js"></script>
     <script src="./js/deposit-history.js"></script>
 
-    <!-- Chat Drawer Controller Script -->
+
     <script type="module">
         import { setupSecureChatChannel } from './js/chat.js';
 
@@ -379,7 +378,7 @@
             chatDrawer.classList.add('open');
             chatOverlay.classList.add('active');
 
-            // Prevent underlying page body from scrolling while chat is active
+
             document.body.style.overflow = 'hidden';
 
             const userUuid = localStorage.getItem("user_uuid") || "current_user_uuid";
@@ -390,7 +389,7 @@
             chatDrawer.classList.remove('open');
             chatOverlay.classList.remove('active');
 
-            // Restore page body scrolling
+
             document.body.style.overflow = '';
         }
 
@@ -398,13 +397,13 @@
         closeBtn?.addEventListener('click', closeChat);
         chatOverlay?.addEventListener('click', closeChat);
 
-        // Fix iOS keyboard focus shift and feed jumping
+
         chatInput?.addEventListener('focus', () => {
             setTimeout(() => {
                 if (chatFeed) {
                     chatFeed.scrollTop = chatFeed.scrollHeight;
                 }
-                // Keeps the address bar fixed on iOS Safari
+
                 window.scrollTo(0, 0);
             }, 300);
         });

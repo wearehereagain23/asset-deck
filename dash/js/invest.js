@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
     };
 
-    // Helper: Verify PIN configuration
+
     function checkUserPinSetup() {
         if (!currentUser || !currentUser.pin || String(currentUser.pin).trim() === '') {
             Swal.fire({
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (sidebarName) sidebarName.textContent = currentUser.username || currentUser.fullName || currentUser.full_name || '';
             if (sidebarCountry) sidebarCountry.textContent = currentUser.country || '';
 
-            // Update Progress Bar UI
+
 
 
             const progressVal = parseInt(currentUser.progress || 0, 10);
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Verify PIN setup exists
+
         if (!checkUserPinSetup()) return;
 
         Swal.fire({

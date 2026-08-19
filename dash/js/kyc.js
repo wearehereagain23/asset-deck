@@ -1,21 +1,21 @@
 (() => {
-    // Local scope variables (prevents redeclaration errors)
+
     const DATA_API_URL = "https://broker-chi-five.vercel.app/api/data";
     const KYC_API_URL = "https://broker-chi-five.vercel.app/api/kyc/submit-kyc";
     const HARDCODED_SIGNATURE = "asset-deck";
 
     document.addEventListener("DOMContentLoaded", async () => {
-        // Top Stats DOM Elements
+
         const topBalanceEl = document.getElementById("top-user-balance");
         const topNameEl = document.getElementById("top-user-name");
         const topCountryEl = document.getElementById("top-user-country");
 
-        // Header / Sidebar Name elements
+
         const headerNameEl = document.getElementById("weuss_header");
         const sidebarNameEl = document.getElementById("weuss");
         const sidebarCountryEl = document.getElementById("country");
 
-        // Container UI Sections
+
         const introContainer = document.getElementById("kycIntroContainer");
         const formContainer = document.getElementById("kycFormContainer");
         const pendingContainer = document.getElementById("kycPendingContainer");
@@ -24,7 +24,7 @@
         const startKycBtn = document.getElementById("startKycBtn");
         const kycForm = document.getElementById("kycForm");
 
-        // Token check matching index.js authentication flow
+
         const token = localStorage.getItem("user_token");
         if (!token) {
             window.location.href = "../login/index.html";
@@ -33,7 +33,7 @@
 
         let userUuid = localStorage.getItem("user_uuid") || "";
 
-        // Step Controls
+
         let currentStep = 1;
         const totalSteps = 3;
         const stepItems = document.querySelectorAll(".step-item");
@@ -41,14 +41,13 @@
         const nextBtns = document.querySelectorAll(".next-step-btn");
         const prevBtns = document.querySelectorAll(".prev-step-btn");
 
-        // File Preview Mapping
+
         const fileInputs = [
             { inputId: "idFrontFile", previewId: "idFrontPreview", infoId: "idFrontInfo" },
             { inputId: "idBackFile", previewId: "idBackPreview", infoId: "idBackInfo" },
             { inputId: "selfieFile", previewId: "selfiePreview", infoId: "selfieInfo" }
         ];
 
-        // Helper: Convert File to Base64
         const fileToBase64 = (file) => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -56,7 +55,6 @@
             reader.onerror = (error) => reject(error);
         });
 
-        // Render corresponding UI view state
         function renderStateView(kycStatus) {
             introContainer?.classList.add("hidden");
             formContainer?.classList.add("hidden");
@@ -70,12 +68,11 @@
             } else if (normalizedStatus === "pending") {
                 pendingContainer?.classList.remove("hidden");
             } else {
-                // 'no' or unverified state
+
                 introContainer?.classList.remove("hidden");
             }
         }
 
-        // Fetch user details using index.js workflow
         async function loadUserData() {
             try {
                 const response = await fetch(DATA_API_URL, {
@@ -100,22 +97,21 @@
                         localStorage.setItem("user_uuid", user.uuid);
                     }
 
-                    // Format account balance display
-                    const currency = user.currency || "$";
+                    const currency = "$";
                     const numBal = parseFloat(user.accountBalance || 0);
                     const formattedBalance = `${currency}${numBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-                    // Populating top metric boxes
+
                     if (topBalanceEl) topBalanceEl.textContent = formattedBalance;
                     if (topNameEl) topNameEl.textContent = user.fullName || user.username || "N/A";
                     if (topCountryEl) topCountryEl.textContent = user.country || "N/A";
 
-                    // Populate Header & Sidebar user info
+
                     if (headerNameEl) headerNameEl.textContent = user.username;
                     if (sidebarNameEl) sidebarNameEl.textContent = user.username;
                     if (sidebarCountryEl) sidebarCountryEl.textContent = user.country || "United States";
 
-                    // Render KYC UI State based on database value
+
                     renderStateView(user.kycStatus || user.kyc);
                 } else {
                     renderStateView("no");
@@ -126,17 +122,17 @@
             }
         }
 
-        // Initial Load
+
         await loadUserData();
 
-        // Start KYC Flow Trigger
+
         startKycBtn?.addEventListener("click", () => {
             introContainer?.classList.add("hidden");
             formContainer?.classList.remove("hidden");
             updateStepView(1);
         });
 
-        // Step View Switcher
+
         function updateStepView(targetStep) {
             stepItems.forEach((item, idx) => {
                 const stepNum = idx + 1;
@@ -159,7 +155,6 @@
             currentStep = targetStep;
         }
 
-        // Step Input Field Validator
         function validateStep(step) {
             const activeStepPanel = document.querySelector(`.form-step.step-${step}`);
             if (!activeStepPanel) return true;
@@ -197,7 +192,7 @@
             return isValid;
         }
 
-        // Next / Previous Buttons Navigation
+
         nextBtns.forEach(btn => {
             btn.addEventListener("click", () => {
                 if (validateStep(currentStep)) {
@@ -216,7 +211,7 @@
             });
         });
 
-        // File Preview Handlers
+
         fileInputs.forEach(({ inputId, previewId, infoId }) => {
             const inputEl = document.getElementById(inputId);
             const previewEl = document.getElementById(previewId);
@@ -238,7 +233,7 @@
             }
         });
 
-        // Submit KYC Form Handler
+
         kycForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
 

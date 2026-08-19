@@ -5,12 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-    // Load Saved Theme
+
     const savedTheme = localStorage.getItem("theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
     updateThemeIcon(savedTheme);
 
-    // Theme Switch Event Listener
+
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener("click", () => {
             const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Toggle Sidebar Drawer Functionality
+
     function toggleSidebar() {
         if (sidebar && sidebarOverlay) {
             sidebar.classList.toggle("open");

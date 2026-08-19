@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Fetch Exact Metrics with Schema Extraction
+
     async function loadMetrics() {
         try {
             const response = await fetch(USER_DATA_API, {
@@ -76,14 +76,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Extract Exact Column Keys
+
             availableBalance = parseFloat(userData.accountBalance || 0);
             userHasPin = Boolean(userData.pin);
             userKycStatus = userData.kyc;
             userProgress = userData.progress;
             userWithdrawStatus = userData.withdrawStatus;
 
-            // Existence Check
+
             if (userKycStatus === undefined) {
                 Swal.fire({ icon: 'error', title: 'Schema Error', text: "Field 'kyc' is missing from API user payload." });
                 return;
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateMethodView(methodSelect.value);
     }
 
-    // Interactive 4-Digit PIN Input Prompt
+
     async function prompt4DigitPin() {
         const { value: pin } = await Swal.fire({
             title: 'Security Verification',
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return pin;
     }
 
-    // Exact Eligibility Check
+
     if (withdrawForm) {
         withdrawForm.addEventListener('submit', async (e) => {
             e.preventDefault();

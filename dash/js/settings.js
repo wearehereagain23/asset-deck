@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const API_BASE = window.API_BASE || "https://broker-chi-five.vercel.app/api";
 
-    // Hardcoded tenant signature
+
     const HARDCODED_SIGNATURE = "asset-deck";
 
     function getStoredEmail() {
@@ -58,9 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const token = getStoredToken();
 
-    // -------------------------------------------------------------
-    // CHANGE PASSWORD FORM HANDLER
-    // -------------------------------------------------------------
+
     const changePasswordForm = document.getElementById("changePasswordForm");
     changePasswordForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -103,9 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // -------------------------------------------------------------
-    // CHANGE PIN FORM HANDLER
-    // -------------------------------------------------------------
+
     const changePinForm = document.getElementById("changePinForm");
     changePinForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -148,9 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // -------------------------------------------------------------
-    // FORGOT PASSWORD FLOW
-    // -------------------------------------------------------------
+
     const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
     forgotPasswordBtn?.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -345,9 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // -------------------------------------------------------------
-    // LOGOUT HANDLER
-    // -------------------------------------------------------------
+
     const logoutActionBtn = document.getElementById("logoutActionBtn");
     const sidebarLogoutBtn = document.getElementById("out");
 
@@ -369,9 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutActionBtn?.addEventListener("click", performLogout);
     sidebarLogoutBtn?.addEventListener("click", performLogout);
 
-    // -------------------------------------------------------------
-    // DELETE ACCOUNT HANDLER
-    // -------------------------------------------------------------
+
     const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
     deleteAccountBtn?.addEventListener("click", async () => {

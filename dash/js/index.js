@@ -1,20 +1,17 @@
-/**
- * Assets-Deck Dashboard Logic Controller
- */
 
 const DATA_API_URL = "https://broker-chi-five.vercel.app/api/data";
 const HARDCODED_SIGNATURE = "asset-deck";
 const DEFAULT_AVATAR = "./asset/userlogo.png";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Instantly activate body blur state
+
     document.body.classList.add("loading-active");
     const loaderOverlay = document.getElementById("pageLoader");
 
     const token = localStorage.getItem("user_token");
     const loginType = localStorage.getItem("login_type");
 
-    // Redirect to login if unauthenticated OR logged in from chat
+
     if (!token || loginType === "from_chat") {
         clearUserSession();
         window.location.href = "../login/index.html";
@@ -56,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const user = result.user;
         const refs = result.referrals;
 
-        // ACTIVE ACCOUNT ENFORCEMENT CHECK
+
         const isActiveAccount = user.active === true || user.active === "true" || user.active === "active";
 
         if (!isActiveAccount) {

@@ -1,6 +1,3 @@
-/**
- * Deposit & Wallet Funding Controller
- */
 
 (() => {
     const FUND_API_URL = window.FUND_API_URL || "https://broker-chi-five.vercel.app/api/fund-wallet";
@@ -14,7 +11,7 @@
             return;
         }
 
-        // DOM Elements
+
         const userBalanceEl = document.getElementById("userBalance");
         const pendingDepositEl = document.getElementById("pendingDeposit");
         const totalDepositEl = document.getElementById("totalDeposit");
@@ -37,9 +34,9 @@
 
         let availableAssets = [];
         let debounceTimer = null;
-        const coinIdCache = {}; // Cache coin IDs dynamically resolved from CoinGecko
+        const coinIdCache = {};
 
-        // Helper to extract clean ticker symbol from DB asset_name (e.g. "LTH" or "Bitcoin (BTC)")
+
         function extractSymbol(assetName) {
             if (!assetName) return "CRYPTO";
             const match = assetName.match(/\(([^)]+)\)/);
@@ -47,22 +44,22 @@
             return assetName.split(" ")[0].trim().toUpperCase();
         }
 
-        // Dynamic CoinGecko ID resolver
+
         async function resolveCoinGeckoId(assetName) {
             const symbol = extractSymbol(assetName).toLowerCase();
 
-            // Check in-memory cache first
+
+
             if (coinIdCache[symbol]) {
                 return coinIdCache[symbol];
             }
 
             try {
-                // Search CoinGecko API dynamically for the asset matching DB symbol
                 const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`);
                 const searchData = await searchRes.json();
 
                 if (searchData && searchData.coins && searchData.coins.length > 0) {
-                    // Find exact symbol match or fallback to first search result
+
                     const exactMatch = searchData.coins.find(c => c.symbol.toLowerCase() === symbol);
                     const matchedId = exactMatch ? exactMatch.id : searchData.coins[0].id;
                     coinIdCache[symbol] = matchedId;
@@ -72,13 +69,10 @@
                 console.warn("Failed to search CoinGecko ID dynamically:", err);
             }
 
-            // Fallback to raw symbol lowercase
+
             return symbol;
         }
 
-        // -------------------------------------------------------------
-        // 1. FETCH INITIAL BALANCE & GATEWAY ASSETS FOR SIGNATURE
-        // -------------------------------------------------------------
         try {
             const response = await fetch(FUND_API_URL, {
                 method: "POST",
@@ -106,12 +100,12 @@
                 return;
             }
 
-            // Populate metrics in USD
+
             if (userBalanceEl) userBalanceEl.textContent = `$${formatCurrency(result.user.accountBalance)}`;
             if (pendingDepositEl) pendingDepositEl.textContent = `$${formatCurrency(result.user.pendingdeposit)}`;
             if (totalDepositEl) totalDepositEl.textContent = `$${formatCurrency(result.user.totaldeposit)}`;
 
-            // Hydrate asset dropdown dynamically from DB response
+
             availableAssets = result.assets || [];
             if (cryptoSelect) {
                 cryptoSelect.innerHTML = `<option value="" disabled selected>-- Select Payment Gateway Asset --</option>`;
@@ -136,9 +130,7 @@
             Swal.fire("Error", "Could not load deposit gateways. Please refresh.", "error");
         }
 
-        // -------------------------------------------------------------
-        // 2. DROPDOWN SELECTION LOGIC
-        // -------------------------------------------------------------
+
         cryptoSelect?.addEventListener("change", (e) => {
             const selectedAssetId = e.target.value;
             const selectedAsset = availableAssets.find(a => String(a.id) === String(selectedAssetId));
@@ -155,9 +147,8 @@
             triggerRealtimeConversion();
         });
 
-        // -------------------------------------------------------------
-        // 3. REALTIME CRYPTO CONVERSION FETCH (DYNAMIC DB ASSET)
-        // -------------------------------------------------------------
+
+
         depositAmountInput?.addEventListener("input", () => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -182,7 +173,7 @@
             if (cryptoConversionDisplay) cryptoConversionDisplay.style.display = "block";
 
             try {
-                // Dynamically resolve CoinGecko API ID for the selected DB asset
+
                 const coinId = await resolveCoinGeckoId(selectedAsset.asset_name);
 
                 const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
@@ -201,9 +192,8 @@
             }
         }
 
-        // -------------------------------------------------------------
-        // 4. COPY ADDRESS & FILE ATTACHMENT LOGIC
-        // -------------------------------------------------------------
+
+
         copyAddressBtn?.addEventListener("click", () => {
             if (!walletAddressInput.value) return;
 
@@ -229,9 +219,7 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // 5. DEPOSIT FORM SUBMISSION
-        // -------------------------------------------------------------
+
         depositForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
 

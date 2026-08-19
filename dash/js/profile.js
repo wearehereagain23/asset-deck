@@ -1,6 +1,4 @@
-/**
- * Profile Page Logic
- */
+
 document.addEventListener("DOMContentLoaded", async () => {
     const PROFILE_API_URL = window.PROFILE_API_URL || "https://broker-chi-five.vercel.app/api/profile";
     const token = localStorage.getItem("user_token");
@@ -10,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // --- DOM Elements ---
+
     const avatarContainer = document.getElementById("avatarUploadContainer");
     const avatarImg = document.getElementById("profileDisplayImage");
     const headerAvatar = document.getElementById("pmler");
@@ -40,12 +38,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const badgeIcon = document.getElementById("kycBadgeIcon");
     const badgeText = document.getElementById("kycBadgeText");
 
-    // Trigger file dialog on avatar container click
+
     avatarContainer?.addEventListener("click", () => {
         imageInput?.click();
     });
 
-    // Helper: Set avatar src across all instance elements
+
     function setAvatarSrc(url) {
         if (!url) return;
         if (avatarImg) avatarImg.src = url;
@@ -53,9 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (sidebarAvatar) sidebarAvatar.src = url;
     }
 
-    // -------------------------------------------------------------
-    // 1. FETCH PROFILE DATA (GET Request)
-    // -------------------------------------------------------------
+
     try {
         const response = await fetch(`${PROFILE_API_URL}?action=get_profile`, {
             method: "GET",
@@ -78,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (result.success && result.profile) {
             const user = result.profile;
 
-            // Name Parser
+
             const nameParts = (user.full_name || "").trim().split(/\s+/);
             if (nameParts.length === 1) {
                 if (firstNameInput) firstNameInput.value = nameParts[0] || "";
@@ -91,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (lastNameInput) lastNameInput.value = nameParts[nameParts.length - 1] || "";
             }
 
-            // Form Fields
+
             if (usernameInput) usernameInput.value = user.username || "";
             if (emailInput) emailInput.value = user.email || "";
             if (phoneInput) phoneInput.value = user.kyc_phone_number || "";
@@ -110,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 setAvatarSrc(user.profileImage);
             }
 
-            // KYC Badge
+
             const kycStatus = (user.kyc || "no").toLowerCase();
             if (badgeContainer && badgeIcon && badgeText) {
                 if (kycStatus === "approved" || kycStatus === "yes") {
@@ -135,14 +131,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         Swal.fire("Error", "Could not load profile details.", "error");
     }
 
-    // -------------------------------------------------------------
-    // 2. AUTOMATIC IMAGE UPLOAD ON FILE PICK
-    // -------------------------------------------------------------
+
     imageInput?.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Instant Local Preview
+
         const reader = new FileReader();
         reader.onload = (evt) => {
             setAvatarSrc(evt.target.result);
@@ -198,9 +192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // -------------------------------------------------------------
-    // 3. PROFILE DETAILS FORM SUBMIT HANDLER
-    // -------------------------------------------------------------
+
     profileForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -253,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // Utility: Convert File Blob to Base64 String
+
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();

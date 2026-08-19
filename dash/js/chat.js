@@ -4,7 +4,7 @@ const chatMaxLimitPerPage = 20;
 let isChatInfiniteScrollLoading = false;
 let absoluteHasOlderDatabaseMessages = true;
 
-// Retrieve user JWT token from localStorage keys saved by login.js
+
 function getUserToken() {
     let token = localStorage.getItem("user_token");
 
@@ -23,7 +23,7 @@ function getUserToken() {
     return token;
 }
 
-// Retrieve user UUID from localStorage saved by login.js
+
 function getUserUuidFromStorage() {
     try {
         const session = JSON.parse(localStorage.getItem("user_session") || "{}");
@@ -36,7 +36,7 @@ function getUserUuidFromStorage() {
 }
 
 export function setupSecureChatChannel(userUuid) {
-    // Use passed UUID or fallback to user_session / user_data in localStorage
+
     activeChatSessionUserUuid = userUuid || getUserUuidFromStorage();
     currentChatPaginationPage = 1;
     absoluteHasOlderDatabaseMessages = true;
@@ -49,13 +49,13 @@ export function setupSecureChatChannel(userUuid) {
     const feedElementContainer = document.getElementById("chat-message-feed");
 
 
-    // Auto-resize functionality while typing
+
     textInput.addEventListener("input", () => {
         textInput.style.height = "auto";
         textInput.style.height = `${Math.min(textInput.scrollHeight, 120)}px`;
     });
 
-    // Handle pressing Enter to send (Shift + Enter creates a new line)
+
     textInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -68,7 +68,7 @@ export function setupSecureChatChannel(userUuid) {
         if (!text) return;
 
         textInput.value = "";
-        textInput.style.height = "auto"; // 🚀 Resets textarea height back to default after sending
+        textInput.style.height = "auto";
 
         const temporaryMessageId = `temp_msg_${Date.now()}`;
         injectOptimisticChatBubbleNode(text, null, temporaryMessageId);
@@ -80,7 +80,7 @@ export function setupSecureChatChannel(userUuid) {
         return;
     }
 
-    // Baseline Cache Hydration
+
     const localizedCacheKey = `user_chat_history_${activeChatSessionUserUuid}`;
     const historicalLocalMessages = localStorage.getItem(localizedCacheKey);
 
@@ -106,7 +106,6 @@ export function setupSecureChatChannel(userUuid) {
 
     if (feedElementContainer) {
         feedElementContainer.onscroll = async (e) => {
-            // Isolate scroll events to prevent document body scrolling
             if (e) e.stopPropagation();
 
             if (feedElementContainer.scrollTop === 0 && !isChatInfiniteScrollLoading && absoluteHasOlderDatabaseMessages) {
@@ -165,9 +164,7 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
     messagesArray.forEach(msg => {
         const container = document.createElement("div");
 
-        // User Side View Perspective:
-        // Messages sent by user ('user') -> outgoing (Right side)
-        // Messages sent by support ('admin_2') -> incoming (Left side)
+
         const isUserMsg = msg.sender_role === "user";
         const alignmentClass = isUserMsg ? "outgoing" : "incoming";
 
@@ -187,7 +184,7 @@ function renderChatMessageFeedFromCacheArray(messagesArray, preserveScrollPositi
 
         const timeString = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : "--:--";
 
-        // Render message content without admin edit/delete controls
+
         container.innerHTML = `
             ${attachmentContentHTML}
             <p id="msg-body-text-${msg.id}">${escapeHTML(msg.message_body || '')}</p>

@@ -9,12 +9,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Top Metric DOM Elements
+
     const userBalanceEl = document.getElementById("user-balance");
     const pendingWithdrawEl = document.getElementById("pending-withdraw");
     const totalWithdrawnEl = document.getElementById("total-withdrawn");
 
-    // Form DOM Elements
+
     const methodSelect = document.getElementById('withdrawalMethod');
     const cryptoSection = document.getElementById('cryptofom');
     const bankSection = document.getElementById('banksection');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // 1. Fetch User Eligibility & Balance Metrics
+
     async function loadMetrics() {
         try {
             const response = await fetch(USER_DATA_API, {
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadMetrics();
 
-    // 2. Dynamic View Adjustments
+
     function updateMethodView(selectedMethod) {
         const details = methodDetails[selectedMethod];
 
@@ -119,12 +119,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateMethodView(methodSelect.value);
     }
 
-    // 3. Process Form Submission
+
     if (withdrawForm) {
         withdrawForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // A. CHECK ELIGIBILITY (KYC, Progress, withdrawStatus)
+
             const isKycApproved = userKycStatus === 'approved';
             const isProgressComplete = userProgress === '100' || parseFloat(userProgress) === 100;
             const isWithdrawEnabled = userWithdrawStatus === true;
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 amount: amount
             };
 
-            // B. FIELD VALIDATIONS & RECIPIENT VERIFICATION FOR INTERNAL TRANSFERS
+
             if (selectedMethod === 'Internal Transfer') {
                 const recipient_username = document.getElementById('recipient_username').value.trim();
 
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // Verify recipient username via API
+
                 Swal.fire({
                     title: 'Verifying Recipient...',
                     allowOutsideClick: false,
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return;
                     }
 
-                    // Confirm Transfer Warning Modal with Receiver's Full Name
+
                     const confirmSend = await Swal.fire({
                         icon: 'question',
                         title: 'Confirm Internal Transfer',
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 payload.acct_swift = acct_swift;
             }
 
-            // C. PIN AUTHORIZATION PROMPT
+
             const { value: enteredPin } = await Swal.fire({
                 title: 'Enter Transaction PIN',
                 input: 'password',

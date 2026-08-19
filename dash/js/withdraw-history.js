@@ -7,23 +7,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // Top Metric DOM Elements
+
     const userBalanceEl = document.getElementById("user-balance");
     const pendingWithdrawEl = document.getElementById("pending-withdraw");
     const totalWithdrawnEl = document.getElementById("total-withdrawn");
 
-    // Table & Control DOM Elements
+
     const tableBody = document.getElementById("withdrawalTableBody");
     const recordCounter = document.getElementById("recordCounter");
     const filterTabs = document.querySelectorAll(".tab-btn");
 
-    // Pagination Controls
+
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const pageIndicator = document.getElementById("pageIndicator");
     const paginationControls = document.getElementById("paginationControls");
 
-    // Modal DOM Elements
+
     const modalOverlay = document.getElementById("txModalOverlay");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const saveReceiptBtn = document.getElementById("saveReceiptBtn");
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let currentPage = 1;
     const itemsPerPage = 8;
 
-    // Helper: Number to Words conversion
+
     function numberToWords(num) {
         if (num === 0) return "Zero US Dollars";
         const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -75,12 +75,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return result;
     }
 
-    // Helper: Currency Formatter
+
     function formatCurrency(val) {
         return parseFloat(val || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Helper: Date Formatter
+
     function formatDate(dateStr) {
         if (!dateStr) return "-";
         const date = new Date(dateStr);
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Helper: Normalize item structure from API data
+
     function normalizeWithdrawal(item) {
         const method = item.withdrawalMethod || item.method || item.type || "Withdrawal";
         let cryptoBank = item.pay_method || item.bank_name || method;
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 
-    // 1. Load Data from Backend API
+
     async function fetchWithdrawalHistory() {
         try {
             const signature = localStorage.getItem("user_signature");
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // 2. Render Table Rows & Handle Pagination
+
     function renderTable() {
         if (!tableBody) return;
         tableBody.innerHTML = "";
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updatePaginationControls(totalPages);
     }
 
-    // 3. Attach Click Event to "View" Receipt Buttons
+
     function attachViewEventListeners(data) {
         document.querySelectorAll(".btn-view-tx").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     modalStatus.textContent = item.status.toUpperCase();
                     modalStatus.className = `receipt-status-pill status-${statusLower}`;
 
-                    // Update Receipt Header Badges
+
                     if (statusLower === "completed" || statusLower === "approved") {
                         modalStatusBadgeIcon.className = "receipt-success-icon status-success";
                         modalStatusBadgeIcon.innerHTML = `<i class="material-icons">check</i>`;
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         modalStatusSubtitle.textContent = "This withdrawal request could not be completed.";
                     }
 
-                    // QR Code Generator
+
                     modalQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Withdrawal-${item.txId}`;
 
                     modalOverlay.classList.add("active");
@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // 4. Pagination Event Listeners
+
     function updatePaginationControls(totalPages) {
         if (!paginationControls) return;
 
@@ -302,7 +302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderTable();
     });
 
-    // 5. Tab Filtering
+
     filterTabs.forEach(tab => {
         tab.addEventListener("click", () => {
             filterTabs.forEach(t => t.classList.remove("active"));
@@ -314,7 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    // 6. Close Modal Listeners
+
     closeModalBtn?.addEventListener("click", () => {
         modalOverlay.classList.remove("active");
     });
@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // 7. Download Receipt Image Logic via html2canvas
+
     saveReceiptBtn?.addEventListener("click", () => {
         const previewArea = document.getElementById("receiptPreviewBox");
         if (!previewArea) return;
@@ -341,6 +341,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    // Initial Execution
+
     await fetchWithdrawalHistory();
 });

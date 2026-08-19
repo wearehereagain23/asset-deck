@@ -1,6 +1,4 @@
-/**
- * Referral Page Logic
- */
+
 (() => {
     const REF_API_URL = window.REF_API_URL || "https://broker-chi-five.vercel.app/api/referrals";
 
@@ -12,7 +10,7 @@
             return;
         }
 
-        // DOM Elements
+
         const referralLinkInput = document.getElementById("referralLinkInput");
         const referralCodeInput = document.getElementById("referralCodeInput");
         const copyBtn = document.getElementById("copyRefBtn");
@@ -29,7 +27,7 @@
         let networkReferrals = [];
         const currencySymbol = "$";
 
-        // 1. Fetch Referral Data from Backend
+
         try {
             const signature = localStorage.getItem("user_signature");
             const requestBody = { token };
@@ -63,11 +61,11 @@
             const refCode = result.ref_code || "";
             const generatedRefLink = `${window.location.origin}/register?ref=${refCode}`;
 
-            // Hydrate Links and Code Inputs
+
             if (referralLinkInput) referralLinkInput.value = generatedRefLink;
             if (referralCodeInput) referralCodeInput.value = refCode;
 
-            // Hydrate Stats
+
             if (totalRefEl) totalRefEl.textContent = result.stats?.totalReferrals || 0;
             if (activeRefEl) activeRefEl.textContent = result.stats?.activeInvestors || 0;
             if (totalCommEl) totalCommEl.textContent = `${currencySymbol}${(result.stats?.totalCommissions || 0).toFixed(2)}`;
@@ -80,7 +78,7 @@
             Swal.fire("Error", "Could not load referral data.", "error");
         }
 
-        // 2. Render Referrals Table
+
         function renderReferrals(data) {
             if (!tableBody) return;
             tableBody.innerHTML = "";
@@ -98,12 +96,11 @@
             data.forEach((item) => {
                 const row = document.createElement("tr");
 
-                // Status Column: totaldeposit display
                 const statusBadge = item.isActive
                     ? `<span class="status-badge active">Deposited: ${currencySymbol}${(item.totaldeposit || 0).toFixed(2)}</span>`
                     : `<span class="status-badge pending">No Deposit (${currencySymbol}0.00)</span>`;
 
-                // Earned Commission Column
+
                 const commissionDisplay = `${currencySymbol}${(item.commission || 0).toFixed(2)}`;
 
                 row.innerHTML = `
@@ -122,19 +119,19 @@
             });
         }
 
-        // 3. Copy Full Referral Link
+
         copyBtn?.addEventListener("click", () => {
             if (!referralLinkInput?.value) return;
             copyToClipboard(referralLinkInput.value, "Referral link copied to clipboard!");
         });
 
-        // 4. Copy Referral Code Only
+
         copyCodeBtn?.addEventListener("click", () => {
             if (!referralCodeInput?.value) return;
             copyToClipboard(referralCodeInput.value, "Referral code copied to clipboard!");
         });
 
-        // Helper Clipboard Function
+
         async function copyToClipboard(text, successMessage) {
             try {
                 await navigator.clipboard.writeText(text);
@@ -151,7 +148,7 @@
             }
         }
 
-        // 5. Share Button
+
         shareBtn?.addEventListener("click", async () => {
             if (navigator.share) {
                 try {
@@ -168,7 +165,7 @@
             }
         });
 
-        // 6. Search Filter
+
         searchInput?.addEventListener("input", (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = networkReferrals.filter(item =>

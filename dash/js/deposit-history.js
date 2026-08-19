@@ -1,6 +1,3 @@
-/**
- * Deposit History Frontend Controller
- */
 
 (() => {
     const HISTORY_API_URL = window.HISTORY_API_URL || "https://broker-chi-five.vercel.app/api/fund-wallet-history";
@@ -18,19 +15,19 @@
             return;
         }
 
-        // DOM Elements
+
         const tableBody = document.getElementById("depositTableBody");
         const recordCounter = document.getElementById("recordCounter");
         const prevBtn = document.getElementById("prevBtn");
         const nextBtn = document.getElementById("nextBtn");
         const pageIndicator = document.getElementById("pageIndicator");
 
-        // Metrics DOM Elements
+
         const userBalanceEl = document.getElementById("userBalance");
         const pendingDepositEl = document.getElementById("pendingDeposit");
         const totalDepositEl = document.getElementById("totalDeposit");
 
-        // Modal Elements
+
         const txModalOverlay = document.getElementById("txModalOverlay");
         const closeModalBtn = document.getElementById("closeModalBtn");
         const saveReceiptBtn = document.getElementById("saveReceiptBtn");
@@ -44,9 +41,7 @@
         const modalDate = document.getElementById("modalDate");
         const modalStatus = document.getElementById("modalStatus");
 
-        // -------------------------------------------------------------
-        // 1. FETCH DEPOSIT HISTORY FROM BACKEND
-        // -------------------------------------------------------------
+
         try {
             const response = await fetch(HISTORY_API_URL, {
                 method: "POST",
@@ -73,13 +68,12 @@
                 return;
             }
 
-            // Hydrate Header Financial Metrics
             const currencySym = "$";
             if (userBalanceEl) userBalanceEl.textContent = `${currencySym}${formatCurrency(result.user.accountBalance)}`;
             if (pendingDepositEl) pendingDepositEl.textContent = `${currencySym}${formatCurrency(result.user.pendingdeposit)}`;
             if (totalDepositEl) totalDepositEl.textContent = `${currencySym}${formatCurrency(result.user.totaldeposit)}`;
 
-            // Map and Save DB Records
+
             depositHistory = (result.deposits || []).map(tx => ({
                 id: `TXN-${tx.id}`,
                 name: tx.username || result.user.username || "N/A",
@@ -98,9 +92,6 @@
             Swal.fire("Error", "Could not load deposit history. Please refresh.", "error");
         }
 
-        // -------------------------------------------------------------
-        // 2. RENDER TABLE DATA ROWS
-        // -------------------------------------------------------------
         function renderTable(page) {
             if (!tableBody) return;
             tableBody.innerHTML = "";
@@ -151,7 +142,7 @@
                 tableBody.appendChild(row);
             });
 
-            // Action listeners for receipt modal
+
             document.querySelectorAll(".action-view-btn").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     const txId = e.currentTarget.getAttribute("data-id");
@@ -163,9 +154,7 @@
             updatePaginationControls();
         }
 
-        // -------------------------------------------------------------
-        // 3. PAGINATION CONTROLS LOGIC
-        // -------------------------------------------------------------
+
         function updatePaginationControls() {
             const totalPages = Math.ceil(depositHistory.length / itemsPerPage) || 1;
 
@@ -190,9 +179,8 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // 4. TRANSACTION DETAILS MODAL
-        // -------------------------------------------------------------
+
+
         function openTransactionModal(tx) {
             if (modalTxId) modalTxId.textContent = tx.id;
             if (modalName) modalName.textContent = tx.name;
@@ -219,9 +207,8 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // 5. SAVE RECEIPT AS IMAGE (html2canvas)
-        // -------------------------------------------------------------
+
+
         saveReceiptBtn?.addEventListener("click", () => {
             if (!receiptPreviewBox) return;
 
@@ -257,9 +244,6 @@
         });
     });
 
-    /**
-     * Helper to format numbers to currency format
-     */
     function formatCurrency(val) {
         const num = parseFloat(val);
         if (isNaN(num)) return "0.00";
